@@ -1,0 +1,80 @@
+# devices.yaml - Device configuration
+audio_devices:
+  - type: pci
+    id: "00:1f.3"  # Intel HDA Audio Controller
+    name: "Intel HDA"
+    target_vm: "workstation"
+  
+  - type: usb
+    vendor_id: "046d"  # Logitech
+    product_id: "0825"  # C270 Webcam (has audio)
+    id: "usb-audio-c270"
+    name: "C270 Audio"
+    target_vm: "workstation"
+
+video_devices:
+  - type: usb
+    vendor_id: "046d"  # Logitech  
+    product_id: "0825"  # C270 Webcam
+    id: "usb-video-c270"
+    name: "Webcam C270"
+    target_vm: "workstation"
+    
+  - type: usb
+    vendor_id: "046d"  # Logitech
+    product_id: "085b"  # C925e Webcam  
+    id: "usb-video-c925e"
+    name: "Webcam C925e"
+    target_vm: "development"
+
+---
+# vms.yaml - Virtual machine configuration
+virtual_machines:
+  - name: "workstation"
+    qmp_socket: "/tmp/qmp-workstation.sock"
+    devices: 
+      - "Intel HDA"
+      - "C270 Audio" 
+      - "Webcam C270"
+      
+  - name: "development"
+    qmp_socket: "/tmp/qmp-development.sock"
+    devices:
+      - "Webcam C925e"
+
+---
+# policies.yaml - Security and operational policies
+security:
+  fail_safe_mode: true  # Default to secure state on errors
+  auto_detach_on_daemon_crash: true
+  require_authentication: false
+  audit_all_operations: true
+
+operational:
+  device_operation_timeout: 10  # seconds
+  vm_connection_timeout: 5      # seconds
+  retry_attempts: 3
+  status_check_interval: 30     # seconds
+
+triggers:
+  # Physical button configuration
+  gpio_pin: 18  # BCM pin number
+  gpio_active_low: true
+  debounce_time: 200  # milliseconds
+  
+  # Keyboard shortcut
+  keyboard_shortcut: "ctrl+alt+shift+k"
+  
+  # Network trigger
+  network_port: 8080
+  network_auth_required: false
+  
+  # File-based trigger (for testing)
+  trigger_file: "/tmp/vm-killswitch-trigger"
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  max_file_size: "10MB"
+  max_files: 5
+  log_to_journal: true
+  log_to_file: true
